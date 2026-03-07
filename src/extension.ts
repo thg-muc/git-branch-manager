@@ -1837,6 +1837,13 @@ function getWebviewContent(
       if (clickedEl) clickedEl.classList.add('active');
       var tabEl = document.getElementById(tabName + '-tab');
       if (tabEl) tabEl.classList.add('active');
+      vscode.setState({ activeTab: tabName });
+    }
+
+    var savedState = vscode.getState();
+    if (savedState && savedState.activeTab && savedState.activeTab !== 'branches') {
+      var tabBtn = document.querySelector('.tab[data-tab="' + savedState.activeTab + '"]');
+      showTab(savedState.activeTab, tabBtn);
     }
 
     // Branch actions
