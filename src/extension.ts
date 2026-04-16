@@ -485,7 +485,9 @@ async function showBranchManager(
       {},
       recoveryLog,
       allBranchNames,
-      showSponsorBanner
+      showSponsorBanner,
+      repoContext.getRepositories().length,
+      repo.name
     );
 
     // Phase 2: Fetch PR data asynchronously and push to webview
@@ -906,6 +908,20 @@ async function showBranchManager(
           await updateWebview();
           break;
 
+        case 'switchRepository': {
+          if (repoContext.getRepositories().length === 0) {
+            await repoContext.discoverRepositories();
+          }
+          const selectedPath = await repoContext.selectRepository();
+          if (selectedPath) {
+            await repoContext.setActiveRepository(selectedPath);
+            await updateWebview();
+            await updateGlobalStatusBar();
+            branchTreeProvider.scheduleRefresh();
+          }
+          break;
+        }
+
         case 'restoreBranch': {
           const { branchName, commitHash } = message;
           const result = await restoreFromLog(context, gitRoot, branchName, commitHash);
@@ -985,7 +1001,9 @@ function getWebviewContent(
   _githubPRs: Record<string, PRStatus>,
   recoveryLog: DeletedBranchEntry[],
   allBranchNames: string[] = [],
-  showSponsorBanner: boolean = false
+  showSponsorBanner: boolean = false,
+  repoCount: number = 1,
+  repoName: string = ''
 ): string {
   const nonce = getNonce();
 
@@ -1255,6 +1273,16 @@ function getWebviewContent(
 
     .btn-secondary:hover {
       background: var(--vscode-button-secondaryHoverBackground);
+    }
+
+    .btn-warning {
+      /* Uses the same paired tokens as the status bar warning item so the theme controls contrast */
+      background: var(--vscode-statusBarItem-warningBackground, #cca700);
+      color: var(--vscode-statusBarItem-warningForeground, #000);
+    }
+
+    .btn-warning:hover {
+      opacity: 0.85;
     }
 
     .action-btn {
@@ -1537,8 +1565,9 @@ function getWebviewContent(
 </head>
 <body>
   <div class="header">
-    <h1>Branch Manager</h1>
+    <h1>Branch Manager${repoName ? ` (${escapeHtml(repoName)})` : ''}</h1>
     <div class="header-actions">
+      ${repoCount > 1 ? '<button class="btn btn-warning" data-action="switchRepository">Switch Repository</button>' : ''}
       <button class="btn" data-action="createBranch">New Branch</button>
       <button class="btn btn-secondary" data-action="refresh">Refresh</button>
     </div>
@@ -2455,6 +2484,7 @@ function getWebviewContent(
         case 'showTab': showTab(el.dataset.tab, el); break;
         case 'refresh': refresh(); break;
         case 'createBranch': vscode.postMessage({ command: 'createBranch' }); break;
+        case 'switchRepository': vscode.postMessage({ command: 'switchRepository' }); break;
         case 'toggleFilter': toggleFilter(el); break;
         case 'deleteGroupSelected': deleteGroupSelected(el.dataset.group); break;
         case 'openUrl': if (el.dataset.url) vscode.postMessage({ command: 'openUrl', url: el.dataset.url }); break;
