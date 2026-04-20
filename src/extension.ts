@@ -441,9 +441,11 @@ async function showBranchManager(
   async function updateWebview() {
     const repo = await repoContext.getActiveRepository();
     if (!repo) {
+      panel.title = 'Git Branch Manager';
       panel.webview.html = getWebviewContent(panel.webview, [], [], [], [], {}, {}, 30, 60, null, '', {}, []);
       return;
     }
+    panel.title = `Git Branch Manager: ${repo.name}`;
     const gitRoot = repo.path;
 
     const config = vscode.workspace.getConfiguration('gitBranchManager');
@@ -1555,7 +1557,7 @@ function getWebviewContent(
 </head>
 <body>
   <div class="header">
-    <h1>Branch Manager${repoName ? ` (${escapeHtml(repoName)})` : ''}</h1>
+    <h1>Branch Manager${repoName ? `: ${escapeHtml(repoName)}` : ''}</h1>
     <div class="header-actions">
       ${repoCount > 1 ? '<button class="btn btn-secondary" data-action="switchRepository">Switch Repository</button>' : ''}
       <button class="btn" data-action="createBranch">New Branch</button>
