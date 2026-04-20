@@ -1275,16 +1275,6 @@ function getWebviewContent(
       background: var(--vscode-button-secondaryHoverBackground);
     }
 
-    .btn-warning {
-      /* Uses the same paired tokens as the status bar warning item so the theme controls contrast */
-      background: var(--vscode-statusBarItem-warningBackground, #cca700);
-      color: var(--vscode-statusBarItem-warningForeground, #000);
-    }
-
-    .btn-warning:hover {
-      opacity: 0.85;
-    }
-
     .action-btn {
       padding: 4px 8px;
       background: var(--vscode-button-secondaryBackground);
@@ -1567,7 +1557,7 @@ function getWebviewContent(
   <div class="header">
     <h1>Branch Manager${repoName ? ` (${escapeHtml(repoName)})` : ''}</h1>
     <div class="header-actions">
-      ${repoCount > 1 ? '<button class="btn btn-warning" data-action="switchRepository">Switch Repository</button>' : ''}
+      ${repoCount > 1 ? '<button class="btn btn-secondary" data-action="switchRepository">Switch Repository</button>' : ''}
       <button class="btn" data-action="createBranch">New Branch</button>
       <button class="btn btn-secondary" data-action="refresh">Refresh</button>
     </div>
